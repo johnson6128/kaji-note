@@ -258,13 +258,15 @@ frequency_type = 'none' | 'daily' | 'weekly' | 'monthly' | 'seasonal' | 'custom'
 
 ## Storage バケット
 
-| バケット | パス構造 | アクセス |
-|----------|---------|---------|
-| `avatars` | `{user_id}/avatar.jpg` | 認証済みユーザー読み取り、本人書き込み |
-| `group-icons` | `{group_id}/icon.jpg` | グループメンバー読み取り、admin 書き込み |
-| `step-photos` | `{note_id}/{step_id}/{photo_id}.jpg` | グループメンバー読み取り（公開手順書）、editor/admin 書き込み |
+詳細設計は [docs/storage-design.md](./storage-design.md) を参照。実装は `supabase/migrations/20260501000001_storage_setup.sql`。
 
-すべてのバケットは **非公開**。クライアントへの画像配信には Supabase の署名付き URL を使用する。
+| バケット | DB 列 | DB 格納形式 | 読み取り | 書き込み |
+|----------|-------|------------|---------|---------|
+| `avatars` | `profiles.avatar_url` | `avatars/{user_id}/avatar.jpg` | 認証済み全員 | 本人のみ |
+| `group-icons` | `groups.icon_url` | `group-icons/{group_id}/icon.jpg` | グループメンバー | admin のみ |
+| `step-photos` | `step_photos.storage_path` | `step-photos/{note_id}/{step_id}/{photo_id}.jpg` | グループメンバー（published）/ 本人（draft） | admin / editor |
+
+すべてのバケットは **非公開**。クライアントへの画像配信には Supabase の **署名付き URL** を使用する。
 
 ---
 
