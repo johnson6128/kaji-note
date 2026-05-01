@@ -13,14 +13,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Tech Stack
 
-*(未定。プロジェクト初期のため、以下の選択肢から決定予定)*
+### モバイルアプリ: React Native (Expo)
 
-**推奨候補:**
-- **モバイルアプリ**: React Native (Expo) — カメラ・写真ライブラリへのアクセスが容易
-- **バックエンド/DB**: Supabase (PostgreSQL + Storage + Auth) — 写真ストレージと認証をまとめて管理できる
-- **状態管理**: Zustand or TanStack Query
+| 用途 | パッケージ |
+|------|-----------|
+| 開発基盤 | Expo SDK 51+ |
+| 画面遷移 | Expo Router |
+| カメラ/写真選択 | expo-image-picker |
+| 写真圧縮 | expo-image-manipulator |
+| 音声入力 | expo-speech + ネイティブ API (iOS: SFSpeechRecognizer / Android: SpeechRecognizer) |
+| ドラッグ&ドロップ | react-native-reanimated + react-native-gesture-handler |
+| オフラインキャッシュ | react-native-mmkv |
+| UI スタイル | NativeWind (Tailwind for React Native) |
 
-技術スタックが確定したら、このセクションを更新してください。
+### バックエンド: Supabase（無料枠運用）
+
+| 機能 | サービス |
+|------|---------|
+| 認証 | Supabase Auth（メール + Google OAuth） |
+| データ | PostgreSQL + Row Level Security |
+| 写真保存 | Supabase Storage |
+| リアルタイム同期 | Supabase Realtime |
+| AI API 中継 | Supabase Edge Functions（API キー保護のため端末から直接呼ばない） |
+
+無料枠: DB 500MB / Storage 1GB / MAU 50,000。上限超過時は自動課金されず手動アップグレードが必要。
+
+### 状態管理
+
+| 役割 | ライブラリ |
+|------|-----------|
+| サーバー状態・オフライン同期 | TanStack Query + @tanstack/query-async-storage-persister |
+| UI 状態（実行モード進捗など） | Zustand |
+
+### AI 機能: Google Gemini API（無料枠運用）
+
+| ユースケース | モデル |
+|------------|-------|
+| UC-07-1 タイトルからステップ生成 | Gemini 1.5 Flash |
+| UC-07-2 次ステップ提案 | Gemini 1.5 Flash |
+| UC-07-3 写真からステップ説明文生成 | Gemini 1.5 Flash (Vision) |
+| UC-07-4 音声テキスト整形 | Gemini 1.5 Flash |
+
+無料枠: 1,500 リクエスト/日。Google Cloud Console で予算アラートを $0 に設定し、課金を有効化しないことで無料枠超過後もリクエストエラーになるだけで自動課金されない。
+
+Gemini API の呼び出しは Supabase Edge Functions 経由で行い、API キーをクライアントに露出させない。
 
 ## Development Commands
 
