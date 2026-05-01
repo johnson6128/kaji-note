@@ -13,12 +13,14 @@ erDiagram
         uuid id PK
         text display_name
         text avatar_url
+        timestamptz updated_at
     }
     groups {
         uuid id PK
         text name
         text icon_url
         uuid created_by FK
+        timestamptz updated_at
     }
     group_members {
         uuid id PK
@@ -46,12 +48,14 @@ erDiagram
         jsonb frequency_config
         date next_scheduled_date
         timestamptz deleted_at
+        timestamptz updated_at
     }
     steps {
         uuid id PK
         uuid note_id FK
         smallint position
         text body
+        timestamptz updated_at
     }
     step_photos {
         uuid id PK
@@ -100,6 +104,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `id` | UUID | PK, FK→auth.users | Supabase Auth の UID |
 | `display_name` | TEXT | 1〜30文字 | 表示名 |
 | `avatar_url` | TEXT | nullable | Storage パス |
+| `updated_at` | TIMESTAMPTZ | DEFAULT now() | `set_updated_at()` トリガーで自動更新 |
 
 ---
 
@@ -114,6 +119,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `name` | TEXT | 1〜50文字 |
 | `icon_url` | TEXT | Storage パス |
 | `created_by` | UUID | FK→profiles |
+| `updated_at` | TIMESTAMPTZ | `set_updated_at()` トリガーで自動更新 |
 
 ---
 
@@ -163,6 +169,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `frequency_config` | JSONB | 頻度パラメーター（下記参照） |
 | `next_scheduled_date` | DATE | 次回実施予定日。`executions` INSERT 時にトリガーで更新 |
 | `deleted_at` | TIMESTAMPTZ | 論理削除フラグ。`soft_delete_note()` RPC 経由で設定する |
+| `updated_at` | TIMESTAMPTZ | `set_updated_at()` トリガーで自動更新 |
 
 **`frequency_config` の JSONB 形式**
 
@@ -183,6 +190,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 |----|----|------|------|
 | `position` | SMALLINT | 1〜30, UNIQUE(note_id, position) | ドラッグ並び替えで更新 |
 | `body` | TEXT | 1〜500文字 | ステップ説明文 |
+| `updated_at` | TIMESTAMPTZ | DEFAULT now() | `set_updated_at()` トリガーで自動更新 |
 
 ---
 
