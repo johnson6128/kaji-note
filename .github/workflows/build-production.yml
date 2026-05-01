@@ -1,0 +1,51 @@
+name: Build Production (main)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: EAS Build (production)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build iOS (production)
+        run: eas build --profile production --platform ios --non-interactive
+
+      - name: Build Android (production)
+        run: eas build --profile production --platform android --non-interactive
+
+      # App Store Connect への提出（審査への提出は App Store Connect 上で手動）
+      - name: Submit to App Store Connect
+        run: eas submit --profile production --platform ios --non-interactive
+
+      # Google Play Internal Track へ提出（Production への昇格は手動）
+      - name: Submit to Google Play
+        run: eas submit --profile production --platform android --non-interactive
+
+      - name: Publish OTA update (production channel)
+        run: eas update --channel production --message "release: ${{ github.event.head_commit.message }}" --non-interactive
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
