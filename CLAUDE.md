@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 画面遷移 | Expo Router |
 | カメラ/写真選択 | expo-image-picker |
 | 写真圧縮 | expo-image-manipulator |
-| 音声入力 | expo-speech + ネイティブ API (iOS: SFSpeechRecognizer / Android: SpeechRecognizer) |
+| 音声入力（STT） | react-native-voice (iOS: SFSpeechRecognizer / Android: SpeechRecognizer) |
 | ドラッグ&ドロップ | react-native-reanimated + react-native-gesture-handler |
 | オフラインキャッシュ | react-native-mmkv |
 | UI スタイル | NativeWind (Tailwind for React Native) |
@@ -33,8 +33,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 認証 | Supabase Auth（メール + Google OAuth） |
 | データ | PostgreSQL + Row Level Security |
 | 写真保存 | Supabase Storage |
-| リアルタイム同期 | Supabase Realtime |
-| AI API 中継 | Supabase Edge Functions（API キー保護のため端末から直接呼ばない） |
+| AI API 中継 / 共有リンク | Supabase Edge Functions（API キー保護のため端末から直接呼ばない） |
+
+**Edge Functions 一覧:**
+
+| 関数名 | 用途 |
+|--------|------|
+| `generate_steps` | UC-07-1: タイトル → ステップ自動生成 |
+| `suggest_next_step` | UC-07-2: 次ステップ提案 |
+| `describe_photo` | UC-07-3: 写真 → ステップ説明文生成 |
+| `format_voice_text` | UC-07-4: 音声テキスト整形 |
+| `get_note_by_share_token` | UC-05-2: 未認証ユーザーへの閲覧専用リンクアクセス（service_role でトークン検証） |
 
 無料枠: DB 500MB / Storage 1GB / MAU 50,000。上限超過時は自動課金されず手動アップグレードが必要。
 
@@ -73,15 +82,26 @@ npm run lint            # lint
 
 ## Architecture Notes
 
-*(実装開始後に記載)*
+設計書は `docs/` ディレクトリを参照:
 
-プロジェクトが育ったら以下を記録してください:
+| ファイル | 内容 |
+|----------|------|
+| `docs/usecases.md` | ユースケース一覧・優先度マトリクス |
+| `docs/features.md` | 機能定義（バリデーション・権限・オフライン挙動など） |
+| `docs/screen-design.md` | 画面設計・ワイヤーフレーム・画面遷移図 |
+| `docs/database-schema.md` | ER 図・テーブル仕様・RLS 設計方針 |
+| `supabase/migrations/` | 実際の SQL マイグレーション |
+
+実装開始後に追記してください:
 - ディレクトリ構成と各層の責務
-- 写真アップロードのフロー（端末 → ストレージ → DB への参照保存）
-- 認証・共有の仕組み（招待リンク、グループ管理など）
+- 写真アップロードのフロー（圧縮 → AI 説明文生成 → Storage → DB）
 
 ## Key Constraints
 
 - **スマートフォン優先**: UI/UX はモバイル画面（375px〜）を基準に設計する
-- **オフライン考慮**: 手順の閲覧は可能な限りオフラインでも動作させる
-- **写真容量**: アップロード前にリサイズ・圧縮して通信コストを抑える
+- **オフライン考慮**: 手順の閲覧・実行モードのステップ進捗はオフラインでも動作させる。ただし「実施済み」記録・編集・写真アップロードはオンライン必須
+- **写真容量**: アップロード前に長辺 1280px・JPEG 品質 80・500KB 以下に圧縮する（`expo-image-manipulator` 使用）
+- **グループ上限**: メンバー上限 20 名は DB 制約ではなくアプリ層で施行する（参加処理前に件数チェック）
+- **AI API はクライアントから直接呼ばない**: Gemini API キーを端末に持たせない。必ず Supabase Edge Functions 経由
+- **論理削除**: 手順書の削除は `soft_delete_note()` RPC を必ず経由する（`deleted_at` を直接 UPDATE しない）
+- **実施記録は不変ログ**: `executions` テーブルへの UPDATE / DELETE は RLS で禁止されている
