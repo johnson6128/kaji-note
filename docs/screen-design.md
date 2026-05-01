@@ -44,6 +44,15 @@ S-02 Note Shelf (Home)
   |
   | Tap [Settings] button
   +-> S-05 Group Settings (Modal)
+
+Invitation deep link (app://join/{token})
+  | Not logged in
+  +-> S-01 Auth (invite token held in memory)
+        | Login / Sign up success
+        v
+        Join group confirm dialog -> S-02 (now a member)
+  | Already logged in
+  +-> Join group confirm dialog -> S-02 (now a member)
 ```
 
 ---
@@ -297,6 +306,7 @@ S-02 Note Shelf (Home)
 - メンバー招待ボタン（招待リンクを生成してコピー・共有）
 - ログアウト
 - ※ 手順書の閲覧専用リンクは S-03（手順ページ）の共有ボタンから発行する
+- ※ 招待リンクの受諾フロー: ディープリンク（`app://join/{token}`）をタップ → ログイン済みの場合はグループ参加確認ダイアログ → 未ログインの場合は S-01 へ遷移しサインアップ後に参加
 
 ---
 

@@ -13,6 +13,7 @@ erDiagram
         uuid id PK
         text display_name
         text avatar_url
+        timestamptz created_at
         timestamptz updated_at
     }
     groups {
@@ -37,6 +38,7 @@ erDiagram
         uuid created_by FK
         timestamptz expires_at
         timestamptz invalidated_at
+        timestamptz created_at
     }
     notes {
         uuid id PK
@@ -57,6 +59,7 @@ erDiagram
         uuid note_id FK
         smallint position
         text body
+        timestamptz created_at
         timestamptz updated_at
     }
     step_photos {
@@ -64,12 +67,14 @@ erDiagram
         uuid step_id FK
         text storage_path
         smallint position
+        timestamptz created_at
     }
     executions {
         uuid id PK
         uuid note_id FK
         uuid executed_by FK
         timestamptz executed_at
+        timestamptz created_at
     }
     share_links {
         uuid id PK
@@ -77,6 +82,7 @@ erDiagram
         text token
         uuid created_by FK
         timestamptz invalidated_at
+        timestamptz created_at
     }
 
     profiles      ||--o{ group_members     : "belongs to"
@@ -106,6 +112,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `id` | UUID | PK, FK→auth.users | Supabase Auth の UID |
 | `display_name` | TEXT | 1〜30文字 | 表示名 |
 | `avatar_url` | TEXT | nullable | Storage パス |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() | |
 | `updated_at` | TIMESTAMPTZ | DEFAULT now() | `set_updated_at()` トリガーで自動更新 |
 
 ---
@@ -159,6 +166,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `token` | TEXT | UNIQUE, 36文字 hex, リンクのシークレット |
 | `expires_at` | TIMESTAMPTZ | 発行から7日後 |
 | `invalidated_at` | TIMESTAMPTZ | 管理者が無効化した日時 |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() |
 
 ---
 
@@ -194,6 +202,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 |----|----|------|------|
 | `position` | SMALLINT | 1〜30, UNIQUE(note_id, position) | ドラッグ並び替えで更新 |
 | `body` | TEXT | 1〜500文字 | ステップ説明文 |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() | |
 | `updated_at` | TIMESTAMPTZ | DEFAULT now() | `set_updated_at()` トリガーで自動更新 |
 
 ---
@@ -206,6 +215,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 |----|----|------|------|
 | `storage_path` | TEXT | | `step-photos/{note_id}/{step_id}/{id}.jpg` |
 | `position` | SMALLINT | 1〜3, UNIQUE(step_id, position) | 表示順 |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() | |
 
 ---
 
@@ -218,6 +228,7 @@ INSERT トリガー `handle_new_execution()` が `notes.next_scheduled_date` を
 |----|----|------|
 | `executed_by` | UUID | FK→profiles |
 | `executed_at` | TIMESTAMPTZ | 実施日時 |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() |
 
 ---
 
@@ -229,7 +240,8 @@ INSERT トリガー `handle_new_execution()` が `notes.next_scheduled_date` を
 | 列 | 型 | 説明 |
 |----|----|------|
 | `token` | TEXT | UNIQUE, 36文字 hex |
-| `invalidated_at` | TIMESTAMPTZ | 管理者が無効化した日時 |
+| `invalidated_at` | TIMESTAMPTZ | admin が無効化した日時（`share_links_update` ポリシーは `is_group_admin` のみ許可） |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() |
 
 ---
 
