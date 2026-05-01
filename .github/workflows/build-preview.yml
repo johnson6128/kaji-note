@@ -25,6 +25,9 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Decode Google Service Account Key
+        run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" | base64 --decode > ./google-service-account.json
+
       - name: Build iOS (preview)
         run: eas build --profile preview --platform ios --non-interactive
 
@@ -33,6 +36,10 @@ jobs:
 
       - name: Submit to TestFlight (Internal)
         run: eas submit --profile preview --platform ios --non-interactive
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Submit to Google Play (Internal Track)
         run: eas submit --profile preview --platform android --non-interactive

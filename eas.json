@@ -16,8 +16,7 @@
         "gradleCommand": ":app:assembleDebug"
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "development",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://your-project-id.supabase.co"
+        "EXPO_PUBLIC_APP_ENV": "development"
       }
     },
     "preview": {
@@ -49,9 +48,9 @@
   "submit": {
     "preview": {
       "ios": {
-        "appleId": "YOUR_APPLE_ID@example.com",
-        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
+        "appleId": "$APPLE_ID",
+        "ascAppId": "$ASC_APP_ID",
+        "appleTeamId": "$APPLE_TEAM_ID"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
@@ -60,9 +59,9 @@
     },
     "production": {
       "ios": {
-        "appleId": "YOUR_APPLE_ID@example.com",
-        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
+        "appleId": "$APPLE_ID",
+        "ascAppId": "$ASC_APP_ID",
+        "appleTeamId": "$APPLE_TEAM_ID"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",

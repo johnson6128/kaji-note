@@ -32,6 +32,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.kajinote.app',
+    infoPlist: {
+      NSMicrophoneUsageDescription:
+        '音声入力でステップの説明文を記録するために使用します。',
+      NSSpeechRecognitionUsageDescription:
+        '話した内容をテキストに変換してステップに入力するために使用します。',
+    },
   },
   android: {
     adaptiveIcon: {
@@ -42,10 +48,25 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
-    'expo-image-picker',
+    [
+      'expo-image-picker',
+      {
+        cameraPermission: 'ステップの写真を撮影するために使用します。',
+        mediaLibraryPermission:
+          'ライブラリの写真を手順書のステップに追加するために使用します。',
+      },
+    ],
     [
       'expo-image-manipulator',
       // No additional native config needed for expo-image-manipulator
+    ],
+    [
+      'expo-build-properties',
+      {
+        android: {
+          permissions: ['android.permission.RECORD_AUDIO'],
+        },
+      },
     ],
   ],
   experiments: {
