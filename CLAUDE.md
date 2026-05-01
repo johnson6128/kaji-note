@@ -122,3 +122,7 @@ npm test
 - **AI API はクライアントから直接呼ばない**: Gemini API キーを端末に持たせない。必ず Supabase Edge Functions 経由
 - **論理削除**: 手順書の削除は `soft_delete_note()` RPC を必ず経由する（`deleted_at` を直接 UPDATE しない）
 - **実施記録は不変ログ**: `executions` テーブルへの UPDATE / DELETE は RLS で禁止されている
+- **下書きノードの実行モード**: 実行モード開始は下書きでも可。ただし「完了・実施済みにする」は公開ノートのみ活性化（RLS が `status = 'published'` を必須とするため）
+- **ディープリンクスキーム**: `kajinote://`（`app.config.ts` の `scheme: 'kajinote'` に対応）。招待リンクは `kajinote://join/{token}`
+- **閲覧専用リンクの URL**: `{EXPO_PUBLIC_SHARE_BASE_URL}/share/{token}`。Expo Router の Web ビルド（S-06）で表示する
+- **OS 権限**: カメラ・フォトライブラリは `expo-image-picker` プラグインで設定済み。マイク・音声認識は `ios.infoPlist` と Android `permissions` で設定済み（`app.config.ts` を参照）

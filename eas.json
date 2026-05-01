@@ -16,8 +16,7 @@
         "gradleCommand": ":app:assembleDebug"
       },
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "development",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://your-project-id.supabase.co"
+        "EXPO_PUBLIC_APP_ENV": "development"
       }
     },
     "preview": {
