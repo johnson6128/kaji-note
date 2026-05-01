@@ -20,6 +20,7 @@ erDiagram
         text name
         text icon_url
         uuid created_by FK
+        timestamptz created_at
         timestamptz updated_at
     }
     group_members {
@@ -47,6 +48,7 @@ erDiagram
         frequency_type frequency_type
         jsonb frequency_config
         date next_scheduled_date
+        timestamptz created_at
         timestamptz deleted_at
         timestamptz updated_at
     }
@@ -119,6 +121,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `name` | TEXT | 1〜50文字 |
 | `icon_url` | TEXT | Storage パス |
 | `created_by` | UUID | FK→profiles |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() |
 | `updated_at` | TIMESTAMPTZ | `set_updated_at()` トリガーで自動更新 |
 
 ---
@@ -168,6 +171,7 @@ Supabase Auth のサインアップ直後に `handle_new_user()` トリガーが
 | `frequency_type` | frequency_type | 頻度種別 |
 | `frequency_config` | JSONB | 頻度パラメーター（下記参照） |
 | `next_scheduled_date` | DATE | 次回実施予定日。`executions` INSERT 時にトリガーで更新 |
+| `created_at` | TIMESTAMPTZ | DEFAULT now() |
 | `deleted_at` | TIMESTAMPTZ | 論理削除フラグ。`soft_delete_note()` RPC 経由で設定する |
 | `updated_at` | TIMESTAMPTZ | `set_updated_at()` トリガーで自動更新 |
 
