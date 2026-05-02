@@ -4,7 +4,8 @@
 -- ============================================================
 
 -- pgcrypto provides gen_random_bytes() used for token generation
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Installed in the extensions schema by Supabase; reference it explicitly
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
 
 -- ============================================================
 -- ENUM TYPES
@@ -96,7 +97,7 @@ CREATE TABLE group_invitations (
   group_id       UUID        NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
   -- URL-safe token; knowing the token is the permission to join
   token          TEXT        NOT NULL UNIQUE
-                               DEFAULT encode(gen_random_bytes(18), 'hex'),
+                               DEFAULT encode(extensions.gen_random_bytes(18), 'hex'),
   created_by     UUID        NOT NULL REFERENCES profiles(id),
   expires_at     TIMESTAMPTZ NOT NULL DEFAULT (now() + INTERVAL '7 days'),
   invalidated_at TIMESTAMPTZ,              -- set by admin to revoke before expiry
@@ -191,7 +192,7 @@ CREATE TABLE share_links (
   id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   note_id        UUID        NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
   token          TEXT        NOT NULL UNIQUE
-                               DEFAULT encode(gen_random_bytes(18), 'hex'),
+                               DEFAULT encode(extensions.gen_random_bytes(18), 'hex'),
   created_by     UUID        NOT NULL REFERENCES profiles(id),
   invalidated_at TIMESTAMPTZ,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
