@@ -57,10 +57,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     [
-      'expo-image-manipulator',
-      // No additional native config needed for expo-image-manipulator
-    ],
-    [
       'expo-build-properties',
       {
         android: {
