@@ -152,6 +152,7 @@ export default function EditNoteScreen() {
       Alert.alert('タイトルを入力してください');
       return;
     }
+    if (!note) return;
     setSaving(true);
     try {
       await updateNote.mutateAsync({

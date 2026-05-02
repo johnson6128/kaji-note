@@ -13,7 +13,7 @@ export function useMyGroups() {
         .select('group_id, role, groups(*)')
         .eq('user_id', userId!);
       if (error) throw error;
-      return (data ?? []) as GroupWithRole[];
+      return (data ?? []) as unknown as GroupWithRole[];
     },
     enabled: !!userId,
   });
