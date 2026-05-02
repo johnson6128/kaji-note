@@ -36,19 +36,26 @@ export function useGroupMembers(groupId: string | null) {
 
 export function useCreateGroup() {
   const qc = useQueryClient();
-  const { userId } = useAuth();
   return useMutation({
     mutationFn: async ({ name }: { name: string }) => {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ログインが必要です');
+      const { error } = await supabase
         .from('groups')
-        .insert({ name, created_by: userId! })
-        .select()
-        .single();
+        .insert({ name, created_by: user.id });
       if (error) throw error;
+      const { data, error: fetchError } = await supabase
+        .from('groups')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (fetchError) throw fetchError;
       return data as Group;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['groups', userId] });
+      qc.invalidateQueries({ queryKey: ['groups'] });
     },
   });
 }
@@ -94,12 +101,13 @@ export function useActiveInvitation(groupId: string | null) {
 
 export function useCreateInvitation(groupId: string | null) {
   const qc = useQueryClient();
-  const { userId } = useAuth();
   return useMutation({
     mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ログインが必要です');
       const { data, error } = await supabase
         .from('group_invitations')
-        .insert({ group_id: groupId!, created_by: userId! })
+        .insert({ group_id: groupId!, created_by: user.id })
         .select()
         .single();
       if (error) throw error;
@@ -113,9 +121,11 @@ export function useCreateInvitation(groupId: string | null) {
 
 export function useJoinGroup() {
   const qc = useQueryClient();
-  const { userId } = useAuth();
   return useMutation({
     mutationFn: async (token: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ログインが必要です');
+
       const { data: invitation, error: invErr } = await supabase
         .from('group_invitations')
         .select('*')
@@ -132,12 +142,12 @@ export function useJoinGroup() {
 
       const { error } = await supabase
         .from('group_members')
-        .insert({ group_id: invitation.group_id, user_id: userId!, role: 'viewer' });
+        .insert({ group_id: invitation.group_id, user_id: user.id, role: 'viewer' });
       if (error) throw error;
       return invitation.group_id as string;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['groups', userId] });
+      qc.invalidateQueries({ queryKey: ['groups'] });
     },
   });
 }
@@ -173,18 +183,19 @@ export function useRemoveMember(groupId: string | null) {
 
 export function useLeaveGroup() {
   const qc = useQueryClient();
-  const { userId } = useAuth();
   return useMutation({
     mutationFn: async (groupId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ログインが必要です');
       const { error } = await supabase
         .from('group_members')
         .delete()
         .eq('group_id', groupId)
-        .eq('user_id', userId!);
+        .eq('user_id', user.id);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['groups', userId] });
+      qc.invalidateQueries({ queryKey: ['groups'] });
     },
   });
 }
